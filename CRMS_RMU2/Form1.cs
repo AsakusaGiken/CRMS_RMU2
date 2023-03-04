@@ -15,6 +15,8 @@ namespace CRMS_RMU2
         public Form1()
         {
             InitializeComponent();
+
+            serialPort1.BaudRate = 57600;
         }
     }
 }
