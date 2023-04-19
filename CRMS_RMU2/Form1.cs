@@ -5,22 +5,26 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace CRMS_RMU2
 {
     public partial class Form1 : Form
     {
-        int eCode;  //error code
+ //       int eCode;  //error code
         MyRichTextBox turbinComTextBox = new MyRichTextBox();
         string turbinComs="";
-        string turbinCom;
+ //       string turbinCom;
         //string comBuf;
         int packetCounter;
         int MQ;
@@ -31,6 +35,7 @@ namespace CRMS_RMU2
         IPAddress ipaddress;
         IPEndPoint endpoint;
 
+
         // マニュアルリセットイベントのインスタンスを生成
         private static ManualResetEvent connectDone = new ManualResetEvent(false);  //接続シグナル用
         private static ManualResetEvent sendDone = new ManualResetEvent(false);     //送信シグナル用
@@ -39,6 +44,19 @@ namespace CRMS_RMU2
         private static string response = string.Empty;
 
         Socket client;
+        int timerCounter = 0;
+
+ //       int dummy=0;
+
+        System.Timers.Timer myTimer;
+
+        public static SerialPort mySerial;
+
+        static byte[] txBuf;
+        //int TXQ;
+        static bool isPacketEnd;
+        static int txPos;
+        int txCnt;
 
 
         public Form1()
@@ -52,10 +70,15 @@ namespace CRMS_RMU2
 
             //serialPort1.BaudRate = 19200;
             serialPort1.BaudRate = 57600;
+           
 
             //timer1.Interval = 50;
-            timer1.Interval = 200;
+            timer1.Interval = 100;
             timer1.Enabled = false;
+
+            myTimer = new System.Timers.Timer(300);
+            myTimer.Elapsed += OnTimerEvent;
+
 
             //turbinComs = "";
             //turbinCom = "";
@@ -71,11 +94,21 @@ namespace CRMS_RMU2
 
             isComOpen = false;
             isConnected = false;
+
+            mySerial = serialPort1 as SerialPort;
+            
+
+            txBuf = new byte[Constants.TXBUF_SIZE];
+
+            isPacketEnd = false;
+            txCnt = 0;
+            txPos = 0;
         }
 
         ~Form1()
         {
             Debug.WriteLine("終了");
+            mySocket.Shutdown(SocketShutdown.Both);
             mySocket.Close();
             mySocket = null;
         }
@@ -137,6 +170,29 @@ namespace CRMS_RMU2
         //data set delegate
         delegate void TextSet(string text);
 
+        void clearTxBufAll()
+        {
+            for (int i = 0; i < Constants.TXBUF_SIZE; i++)
+            {
+                txBuf[i] = 0x00;
+            }
+
+        }
+
+        void clearTxBuf()
+        {
+            for(int i=0; i<Constants.TXBUF_SIZE; i++)
+            {
+                if (txBuf[i] == 0x00)
+                {
+                    break;
+                }
+                else
+                {
+                    txBuf[i] = 0x00;
+                }
+            }
+        }
 
         private void testDisplay()
         {
@@ -211,18 +267,24 @@ namespace CRMS_RMU2
             }
         }
 
+        private void ipClose()
+        {
+            mySocket.Shutdown(SocketShutdown.Both);
+            mySocket.Close();
+        }
+
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
 
+            /*
             try
             {
-                /*
+                
+                Task.Delay(10);
                 byte[] data = new byte[1000];
                 int dataLen = serialPort1.BytesToRead;
                 serialPort1.Read(data, 0, dataLen);
-                client.BeginSend(data, 0, dataLen, 0, new AsyncCallback(SendCallback), client);
-                */
-                
+                client.BeginSend(data, 0, dataLen, 0, new AsyncCallback(SendCallback), client);  
             }
             catch (System.InvalidOperationException e1)
             {
@@ -232,6 +294,7 @@ namespace CRMS_RMU2
             {
                 eCode = 2;
             }
+            */
         }
 
         private void button_comOpen_Click(object sender, EventArgs e)
@@ -262,8 +325,6 @@ namespace CRMS_RMU2
 
 
             }
-
-
         }
 
         private void ipConnect()
@@ -276,11 +337,62 @@ namespace CRMS_RMU2
             mySocket.Connect(endpoint);
         }
 
+        private void ipConnect2()
+        {
+            
+            response = string.Empty;
+
+            //シグナルをリセット
+            connectDone.Reset();
+            sendDone.Reset();
+            receiveDone.Reset();
+            try
+            {
+                // IPアドレスとポート番号を取得
+                IPAddress ipaddress = Dns.GetHostAddresses(textBox_IP.Text)[0];
+                IPEndPoint endpoint = new IPEndPoint(ipaddress, Int32.Parse(textBox_PORT.Text));
+
+                // TCP/IPのソケットを作成
+                client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                // エンドポイント（IPアドレスとポート）へ接続
+                client.BeginConnect(endpoint, new AsyncCallback(ConnectCallback), client);
+                connectDone.WaitOne();  //接続シグナルになるまで待機
+
+                // ASCIIエンコーディングで送信データをバイトの配列に変換
+                //byte[] byteData = Encoding.ASCII.GetBytes(data + "<EOF>");
+
+                // サーバーへデータを送信
+                //client.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), client);
+                //sendDone.WaitOne();  //送信シグナルになるまで待機
+
+                // ソケット情報を保持する為のオブジェクトを生成
+                StateObject state = new StateObject();
+                state.workSocket = client;
+
+                // サーバーからデータ受信
+                client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+                receiveDone.WaitOne();  //受信シグナルになるまで待機
+
+                // ソケット接続終了
+                client.Shutdown(SocketShutdown.Both);
+                client.Close();
+                Debug.WriteLine("接続終了");
+            }
+            catch(Exception ex)
+            {
+
+            }
+            
+
+        }
+
+
         private void button_Connect_Click(object sender, EventArgs e)
         {
             try
             {
-                ipConnect();
+                ipConnect2();
                 Debug.WriteLine("接続");
             }
             catch (Exception ex)
@@ -336,7 +448,7 @@ namespace CRMS_RMU2
 
         }
 
-        /*
+        
         private static void ConnectCallback(IAsyncResult ar)
         {
             try
@@ -368,6 +480,23 @@ namespace CRMS_RMU2
                 // 非同期送信を終了
                 int bytesSent = client.EndSend(ar);
                 Debug.WriteLine("送信完了");
+/*
+                txPos = 0;
+                isPacketEnd = false;
+//               clearTxBuf();
+                for (int i = 0; i < Constants.TXBUF_SIZE; i++)
+                {
+                    if (txBuf[i] == 0x00)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        txBuf[i] = 0x00;
+                    }
+                }
+*/
+
 
                 // シグナル状態にし、メインスレッドの処理を続行する
                 sendDone.Set();
@@ -377,6 +506,8 @@ namespace CRMS_RMU2
                 Debug.WriteLine(e.ToString());
             }
         }
+
+
 
         private static void ReceiveCallback(IAsyncResult ar)
         {
@@ -392,11 +523,19 @@ namespace CRMS_RMU2
                 if (bytesRead > 0)
                 {
                     // 受信したデータを蓄積
-                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                    //state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                    
+                    mySerial.Write(state.buffer, 1, bytesRead-2);
+
+                    Debug.WriteLine("受信"+bytesRead.ToString());
+
 
                     // 受信処理再開（まだ受信しているデータがあるため）
                     client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+                    
+
                 }
+                /*
                 else
                 {
                     // 受信完了
@@ -408,20 +547,78 @@ namespace CRMS_RMU2
                     // シグナル状態にし、メインスレッドの処理を続行する
                     receiveDone.Set();
                 }
+                */
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.ToString());
             }
         }
-        */
 
+        private void OnTimerEvent(Object sender, ElapsedEventArgs e)
+        {
+            timerCounter++;
+
+            if (client.Connected == false)
+            {
+                Debug.WriteLine("再接続");
+                ipConnect2();
+            }
+            if (isComOpen)
+            {
+                //とりあえず受信
+                byte[] data = new byte[1000];
+                int dataLen = serialPort1.BytesToRead;
+                if (dataLen > 0)
+                {
+                    serialPort1.Read(data, 0, dataLen);
+                    //copy
+                    for (int i = 0; i < dataLen; i++)
+                    {
+                        txBuf[txPos] = data[i];
+                        txPos++;
+                    }
+                    //end of the packet?
+                    if (txBuf[txPos - 1] == 0x04)  //end of the packet is 0x04
+                    {
+                        isPacketEnd = true;
+                    }
+                    //send
+                    if (isPacketEnd)
+                    {
+                        //client.BeginSend(data, 0, dataLen, 0, new AsyncCallback(SendCallback), client);
+                        //client.BeginSend(txBuf, 0, txPos, 0, new AsyncCallback(SendCallback), client);
+                        client.Send(txBuf, 0, txPos, SocketFlags.None);
+                        Debug.WriteLine("送信完了"+dataLen.ToString());
+
+                        txPos = 0;
+                        clearTxBuf();
+                        isPacketEnd=false;
+                        
+                    }
+                }
+            }
+
+        }
+
+        /*
+         * Timer1は使わない myTimerを使う
+         */
         private void timer1_Tick(object sender, EventArgs e)
         {
             try
             {
+                timerCounter++;
+                
+                if(client.Connected == false)
+                {
+                    ipConnect2();
+                }
+
+                /*
                 if (isComOpen)
                 {
+                    //CRMSからの受信
                     int dataLen = serialPort1.BytesToRead;
                     if (dataLen > 0)
                     {
@@ -432,14 +629,25 @@ namespace CRMS_RMU2
                         if (mySocket.Connected == false)
                         {
                             mySocket.Close();
-                            ipConnect();
+                            ipConnect2();
                             Debug.WriteLine("再接続");
                         }
-                        mySocket.Send(data, dataLen, SocketFlags.None);
+
+
+                        //mySocket.Send(data, dataLen, SocketFlags.None);
+
+                        client.BeginSend(data, 0, dataLen, 0, new AsyncCallback(SendCallback), client);
+                        sendDone.WaitOne();  //送信シグナルになるまで待機
+
+
+
                         Debug.WriteLine("送信:"+dataLen.ToString());
-                        mySocket.Close();
+                        Task.Delay(30);
+
+                        //mySocket.Close();
                     }
                 }
+                */
                 
             }
             catch (Exception e2)
@@ -500,8 +708,11 @@ namespace CRMS_RMU2
                 //COM open
                 serialPort1.PortName = textBox_Com.Text;
                 serialPort1.Open();
+                serialPort1.DiscardInBuffer();
                 isComOpen = true;
-                timer1.Enabled = true;
+                clearTxBufAll();
+                //timer1.Enabled = true;
+                myTimer.Start();
             }
             catch(Exception e1)
             {
@@ -511,13 +722,15 @@ namespace CRMS_RMU2
             try
             {
                 //IO connect
-                ipConnect();
                 Debug.WriteLine("接続");
+                ipConnect2();
+                
             }
             catch (Exception ex)
             {
                 MessageBox.Show("IP接続に失敗しました。\n\n" + ex.ToString(), "IP接続エラー");
             }
+
         }
 
         private void button_disconnect_Click(object sender, EventArgs e)
@@ -555,6 +768,12 @@ namespace CRMS_RMU2
 
         // ソケット
         public Socket workSocket = null;
+    }
+
+    //定数クラス
+    static class Constants
+    {
+        public const int TXBUF_SIZE = 1000;
     }
 
 }

@@ -33,8 +33,8 @@
             this.button_comOpen = new System.Windows.Forms.Button();
             this.textBox_Com = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.mTID設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.基本設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mTID設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.button_clear = new System.Windows.Forms.Button();
             this.textBox_IP = new System.Windows.Forms.TextBox();
@@ -55,6 +55,7 @@
             // 
             // serialPort1
             // 
+            this.serialPort1.Handshake = System.IO.Ports.Handshake.RequestToSend;
             this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
             // 
             // button_comOpen
@@ -90,19 +91,19 @@
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // mTID設定ToolStripMenuItem
-            // 
-            this.mTID設定ToolStripMenuItem.Name = "mTID設定ToolStripMenuItem";
-            this.mTID設定ToolStripMenuItem.Size = new System.Drawing.Size(71, 20);
-            this.mTID設定ToolStripMenuItem.Text = "MTID編集";
-            this.mTID設定ToolStripMenuItem.Click += new System.EventHandler(this.mTID設定ToolStripMenuItem_Click);
-            // 
             // 基本設定ToolStripMenuItem
             // 
             this.基本設定ToolStripMenuItem.Name = "基本設定ToolStripMenuItem";
             this.基本設定ToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
             this.基本設定ToolStripMenuItem.Text = "基本設定";
             this.基本設定ToolStripMenuItem.Click += new System.EventHandler(this.基本設定ToolStripMenuItem_Click);
+            // 
+            // mTID設定ToolStripMenuItem
+            // 
+            this.mTID設定ToolStripMenuItem.Name = "mTID設定ToolStripMenuItem";
+            this.mTID設定ToolStripMenuItem.Size = new System.Drawing.Size(71, 20);
+            this.mTID設定ToolStripMenuItem.Text = "MTID編集";
+            this.mTID設定ToolStripMenuItem.Click += new System.EventHandler(this.mTID設定ToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
