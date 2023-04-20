@@ -56,7 +56,6 @@
             // serialPort1
             // 
             this.serialPort1.Handshake = System.IO.Ports.Handshake.RequestToSend;
-            this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
             // 
             // button_comOpen
             // 
