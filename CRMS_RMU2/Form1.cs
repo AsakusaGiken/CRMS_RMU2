@@ -198,10 +198,7 @@ namespace CRMS_RMU2
         {
             try
             {
-
-                timerCounter++;
-
-                //if (client.Connected == false)
+                timerCounter++; //使ってない
                 if (tcpClient.Connected == false)
                 {
                     Debug.WriteLine("再接続");
@@ -210,7 +207,7 @@ namespace CRMS_RMU2
                 }
                 if (isComOpen)
                 {
-                    //とりあえず受信
+                    //Serial受信
                     byte[] data = new byte[1000];
                     int dataLen = serialPort1.BytesToRead;
                     if (dataLen > 0)
@@ -223,6 +220,8 @@ namespace CRMS_RMU2
                             txPos++;
                         }
                         //end of the packet?
+                        //パケット区切り（0x04）で分けないとCRMS側のヘッダエラーが出やすいので区切る
+                        //そのためにtxBufに一時保存してる
                         if (txBuf[txPos - 1] == 0x04)  //end of the packet is 0x04
                         {
                             isPacketEnd = true;
@@ -230,8 +229,7 @@ namespace CRMS_RMU2
                         //send
                         if (isPacketEnd)
                         {
-                            //client.Send(txBuf, 0, txPos, SocketFlags.None);
-
+                            //TCPへ送信
                             if (networkStream != null && networkStream.CanWrite)
                             {
                                 networkStream.Write(txBuf, 0, txPos);
@@ -326,6 +324,7 @@ namespace CRMS_RMU2
 
         }
 
+        //終了
         private void button_Close_Click(object sender, EventArgs e)
         {
             Debug.WriteLine("終了");
@@ -336,6 +335,7 @@ namespace CRMS_RMU2
             myTimer = null;
             tcpClient.Close();
             tcpClient = null;
+            this.Close();
         }
     }
 
