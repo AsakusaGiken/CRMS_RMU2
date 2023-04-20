@@ -30,42 +30,27 @@
         {
             this.components = new System.ComponentModel.Container();
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
-            this.button_comOpen = new System.Windows.Forms.Button();
             this.textBox_Com = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.基本設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mTID設定ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.button_clear = new System.Windows.Forms.Button();
             this.textBox_IP = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_PORT = new System.Windows.Forms.TextBox();
-            this.button_Connect = new System.Windows.Forms.Button();
             this.connectLamp = new System.Windows.Forms.TextBox();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.button_Close = new System.Windows.Forms.Button();
             this.comboBox_idSelect = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.button_Conn = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
-            this.button_disconnect = new System.Windows.Forms.Button();
+            this.button_Close = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // serialPort1
             // 
             this.serialPort1.Handshake = System.IO.Ports.Handshake.RequestToSend;
-            // 
-            // button_comOpen
-            // 
-            this.button_comOpen.Location = new System.Drawing.Point(82, 253);
-            this.button_comOpen.Name = "button_comOpen";
-            this.button_comOpen.Size = new System.Drawing.Size(75, 23);
-            this.button_comOpen.TabIndex = 1;
-            this.button_comOpen.Text = "Open";
-            this.button_comOpen.UseVisualStyleBackColor = true;
-            this.button_comOpen.Click += new System.EventHandler(this.button_comOpen_Click);
             // 
             // textBox_Com
             // 
@@ -86,7 +71,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(452, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(445, 24);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -110,16 +95,6 @@
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
-            // 
-            // button_clear
-            // 
-            this.button_clear.Location = new System.Drawing.Point(333, 328);
-            this.button_clear.Name = "button_clear";
-            this.button_clear.Size = new System.Drawing.Size(75, 23);
-            this.button_clear.TabIndex = 4;
-            this.button_clear.Text = "Crear";
-            this.button_clear.UseVisualStyleBackColor = true;
-            this.button_clear.Click += new System.EventHandler(this.button_clear_Click);
             // 
             // textBox_IP
             // 
@@ -157,37 +132,13 @@
             this.textBox_PORT.TabIndex = 8;
             this.textBox_PORT.Text = "21008";
             // 
-            // button_Connect
-            // 
-            this.button_Connect.Location = new System.Drawing.Point(79, 289);
-            this.button_Connect.Name = "button_Connect";
-            this.button_Connect.Size = new System.Drawing.Size(75, 23);
-            this.button_Connect.TabIndex = 9;
-            this.button_Connect.Text = "Connect";
-            this.button_Connect.UseVisualStyleBackColor = true;
-            this.button_Connect.Click += new System.EventHandler(this.button_Connect_Click);
-            // 
             // connectLamp
             // 
-            this.connectLamp.Location = new System.Drawing.Point(57, 291);
+            this.connectLamp.Location = new System.Drawing.Point(182, 46);
             this.connectLamp.Name = "connectLamp";
             this.connectLamp.ReadOnly = true;
             this.connectLamp.Size = new System.Drawing.Size(16, 19);
             this.connectLamp.TabIndex = 10;
-            // 
-            // timer1
-            // 
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // button_Close
-            // 
-            this.button_Close.Location = new System.Drawing.Point(79, 318);
-            this.button_Close.Name = "button_Close";
-            this.button_Close.Size = new System.Drawing.Size(75, 23);
-            this.button_Close.TabIndex = 11;
-            this.button_Close.Text = "Close";
-            this.button_Close.UseVisualStyleBackColor = true;
-            this.button_Close.Click += new System.EventHandler(this.button_Close_Click);
             // 
             // comboBox_idSelect
             // 
@@ -209,7 +160,7 @@
             // 
             // button_Conn
             // 
-            this.button_Conn.Location = new System.Drawing.Point(42, 180);
+            this.button_Conn.Location = new System.Drawing.Point(212, 46);
             this.button_Conn.Name = "button_Conn";
             this.button_Conn.Size = new System.Drawing.Size(75, 23);
             this.button_Conn.TabIndex = 14;
@@ -226,36 +177,32 @@
             this.label4.TabIndex = 15;
             this.label4.Text = "COM";
             // 
-            // button_disconnect
+            // button_Close
             // 
-            this.button_disconnect.Location = new System.Drawing.Point(42, 224);
-            this.button_disconnect.Name = "button_disconnect";
-            this.button_disconnect.Size = new System.Drawing.Size(75, 23);
-            this.button_disconnect.TabIndex = 16;
-            this.button_disconnect.Text = "切断";
-            this.button_disconnect.UseVisualStyleBackColor = true;
-            this.button_disconnect.Click += new System.EventHandler(this.button_disconnect_Click);
+            this.button_Close.Location = new System.Drawing.Point(197, 109);
+            this.button_Close.Name = "button_Close";
+            this.button_Close.Size = new System.Drawing.Size(75, 23);
+            this.button_Close.TabIndex = 16;
+            this.button_Close.Text = "終了";
+            this.button_Close.UseVisualStyleBackColor = true;
+            this.button_Close.Click += new System.EventHandler(this.button_Close_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(452, 364);
-            this.Controls.Add(this.button_disconnect);
+            this.ClientSize = new System.Drawing.Size(445, 228);
+            this.Controls.Add(this.button_Close);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.button_Conn);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.comboBox_idSelect);
-            this.Controls.Add(this.button_Close);
             this.Controls.Add(this.connectLamp);
-            this.Controls.Add(this.button_Connect);
             this.Controls.Add(this.textBox_PORT);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox_IP);
-            this.Controls.Add(this.button_clear);
             this.Controls.Add(this.textBox_Com);
-            this.Controls.Add(this.button_comOpen);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
@@ -270,26 +217,21 @@
         #endregion
 
         private System.IO.Ports.SerialPort serialPort1;
-        private System.Windows.Forms.Button button_comOpen;
         private System.Windows.Forms.TextBox textBox_Com;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem mTID設定ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.Button button_clear;
         private System.Windows.Forms.TextBox textBox_IP;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox_PORT;
-        private System.Windows.Forms.Button button_Connect;
         private System.Windows.Forms.TextBox connectLamp;
-        private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.Button button_Close;
         private System.Windows.Forms.ToolStripMenuItem 基本設定ToolStripMenuItem;
         private System.Windows.Forms.ComboBox comboBox_idSelect;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button button_Conn;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button button_disconnect;
+        private System.Windows.Forms.Button button_Close;
     }
 }
 
